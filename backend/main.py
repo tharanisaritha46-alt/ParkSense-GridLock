@@ -1,22 +1,12 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from routes.hotspots import router as hotspots_router
 from routes.analytics import router as analytics_router
 from routes.enforcement import router as enforcement_router
 from routes.evidence import router as evidence_router
-
-# Allow requests from Vercel frontend + localhost dev
-ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://*.vercel.app",
-    # Set FRONTEND_URL env var on Render once you have your Vercel URL
-    os.getenv("FRONTEND_URL", ""),
-]
 
 app = FastAPI(
     title="ParkSense GridLock API",
@@ -26,9 +16,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Open CORS — hackathon demo (Vercel + HF Spaces + localhost)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # Open for hackathon demo; tighten for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,7 +40,7 @@ async def root():
         "service": "ParkSense GridLock",
         "status": "operational",
         "version": "1.0.0",
-        "description": "AI parking intelligence — PS1 submission, Bengaluru Traffic Police Hackathon",
+        "description": "AI parking intelligence — PS1 submission, BTP Hackathon 2024",
         "docs": "/docs",
     }
 
