@@ -32,8 +32,8 @@ Thumbs.db
 .idea/
 *.swp
 
-# Outputs (keep structure, not big files)
-backend/outputs/*.json
+# Outputs — committed so Render can serve without re-running pipeline
+# backend/outputs/*.json
 
 # Logs
 *.log

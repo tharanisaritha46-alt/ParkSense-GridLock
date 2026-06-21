@@ -16,4 +16,9 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
   },
+  // Exposes VITE_API_URL to the frontend bundle
+  // Set this in Vercel dashboard: VITE_API_URL = https://your-render-url.onrender.com
+  define: {
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8000'),
+  },
 })
