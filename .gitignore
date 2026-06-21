@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.venv/
+venv/
+env/
+*.pyc
+
+# Node / Frontend
+node_modules/
+dist/
+.cache/
+*.local
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Data (large files)
+data/raw/*.csv
+data/processed/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# Outputs (keep structure, not big files)
+backend/outputs/*.json
+
+# Logs
+*.log
+logs/
