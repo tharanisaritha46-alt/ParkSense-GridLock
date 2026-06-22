@@ -304,5 +304,25 @@
       "date": "2024-04-08",
       "count": 1190
     }
-  ]
+  ],
+  "monthly_trend": {
+    "April": 15045,
+    "December": 63535,
+    "February": 54623,
+    "January": 65778,
+    "March": 55196,
+    "November": 44100
+  },
+  "day_distribution": {
+    "Friday": 41647,
+    "Monday": 38921,
+    "Saturday": 43412,
+    "Sunday": 46842,
+    "Thursday": 41512,
+    "Tuesday": 42909,
+    "Wednesday": 43034
+  },
+  "junction_violations": 150570,
+  "peak_violations": 51640,
+  "unique_stations": 54
 }
