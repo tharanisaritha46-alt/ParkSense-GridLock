@@ -31,7 +31,7 @@ async def get_kpis():
 async def get_hourly():
     data = load_analytics()
     hourly = data["hourly_distribution"]
-    return [{"hour": int(h), "count": int(v)} for h, v in sorted(hourly.items(), key=lambda x: int(x[0]))]
+    return [{"hour": int(float(h)), "count": int(v)} for h, v in sorted(hourly.items(), key=lambda x: int(float(x[0])))]
 
 
 @router.get("/vehicles")
