@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BASE = import.meta.env.VITE_API_URL || 'https://saritha-1-parksense-gridlock-api.hf.space'
 
 async function get(path) {
   const res = await fetch(`${BASE}${path}`)
