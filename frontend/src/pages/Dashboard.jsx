@@ -38,9 +38,10 @@ export default function Dashboard() {
   const [trend, setTrend] = useState([])
   const [top5, setTop5] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       api.analytics.kpis(),
       api.analytics.hourly(),
       api.analytics.vehicles(),
@@ -48,25 +49,41 @@ export default function Dashboard() {
       api.analytics.trend(),
       api.hotspots.summary(),
     ]).then(([k, h, v, viol, tr, hs]) => {
-      setKpis(k)
-      setHourly(h)
-      setVehicles(v.slice(0, 7))
-      setViolations(viol.slice(0, 6))
-      setTrend(tr.slice(-30))
-      setTop5(hs.top_5 || [])
+      if (k.status === 'fulfilled') setKpis(k.value)
+      if (h.status === 'fulfilled') setHourly(h.value)
+      if (v.status === 'fulfilled') setVehicles(v.value.slice(0, 7))
+      if (viol.status === 'fulfilled') setViolations(viol.value.slice(0, 6))
+      if (tr.status === 'fulfilled') setTrend(tr.value.slice(-30))
+      if (hs.status === 'fulfilled') setTop5(hs.value.top_5 || [])
+
+      // Log any failures for debugging
+      ;[k, h, v, viol, tr, hs].forEach((r, i) => {
+        if (r.status === 'rejected') console.error(`Dashboard API call ${i} failed:`, r.reason)
+      })
+
       setLoading(false)
-    }).catch(console.error)
+    }).catch(err => {
+      console.error('Dashboard fatal error:', err)
+      setError(err.message)
+      setLoading(false)
+    })
   }, [])
+
+  if (error) return (
+    <div className="loading-state" style={{ height: '60vh', flexDirection: 'column', gap: 12 }}>
+      <div style={{ color: 'var(--red-critical)', fontSize: 18 }}>⚠️ Failed to load dashboard</div>
+      <div style={{ color: 'var(--text-muted)', fontSize: 12, fontFamily: 'var(--font-mono)' }}>{error}</div>
+      <button onClick={() => window.location.reload()} style={{ marginTop: 8, padding: '8px 20px', background: 'var(--amber)', color: '#000', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+        Retry
+      </button>
+    </div>
+  )
 
   return (
     <>
       <div className="page-header">
-        <div className="page-title">
-          ⬛ Command Dashboard
-        </div>
-        <div className="page-subtitle">
-          BENGALURU TRAFFIC POLICE · PARKING VIOLATION INTELLIGENCE · PS1
-        </div>
+        <div className="page-title">⬛ Command Dashboard</div>
+        <div className="page-subtitle">BENGALURU TRAFFIC POLICE · PARKING VIOLATION INTELLIGENCE · PS1</div>
       </div>
 
       <div className="page-body">
@@ -76,34 +93,38 @@ export default function Dashboard() {
           <div className="chart-card">
             <div className="chart-title">Daily Violation Trend</div>
             <div className="chart-subtitle">LAST 30 DAYS · BENGALURU CITY</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={trend} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
-                <defs>
-                  <linearGradient id="ambGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f5a623" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#f5a623" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="date" tick={{ fill: '#505670', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} interval={4} />
-                <YAxis tick={{ fill: '#505670', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="count" stroke="#f5a623" strokeWidth={2} fill="url(#ambGrad)" name="Violations" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {loading ? <div className="loading-state"><div className="spinner" /></div> : (
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={trend} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id="ambGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f5a623" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#f5a623" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="date" tick={{ fill: '#505670', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} interval={4} />
+                  <YAxis tick={{ fill: '#505670', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="count" stroke="#f5a623" strokeWidth={2} fill="url(#ambGrad)" name="Violations" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           <div className="chart-card">
             <div className="chart-title">Violation Types</div>
             <div className="chart-subtitle">DISTRIBUTION BY CATEGORY</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={violations} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 80 }}>
-                <XAxis type="number" tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
-                <YAxis dataKey="violation" type="category" tick={{ fill: '#8b92a8', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} width={80} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" fill="#f5a623" radius={[0, 4, 4, 0]} name="Count" />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? <div className="loading-state"><div className="spinner" /></div> : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={violations} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 80 }}>
+                  <XAxis type="number" tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <YAxis dataKey="violation" type="category" tick={{ fill: '#8b92a8', fontSize: 9, fontFamily: 'var(--font-mono)' }} tickLine={false} axisLine={false} width={80} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" fill="#f5a623" radius={[0, 4, 4, 0]} name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
@@ -111,47 +132,52 @@ export default function Dashboard() {
           <div className="chart-card">
             <div className="chart-title">Hourly Violation Pattern</div>
             <div className="chart-subtitle">PEAK HOURS IDENTIFY PATROL WINDOWS</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={hourly} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="hour" tick={{ fill: '#505670', fontSize: 9 }} tickLine={false}
-                  tickFormatter={h => `${String(h).padStart(2,'0')}:00`} interval={2} />
-                <YAxis tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Violations">
-                  {hourly.map((d, i) => (
-                    <Cell key={i} fill={[7,8,9,17,18,19,20].includes(d.hour) ? '#ff3b5c' : '#f5a623'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? <div className="loading-state"><div className="spinner" /></div> : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={hourly} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="hour" tick={{ fill: '#505670', fontSize: 9 }} tickLine={false}
+                    tickFormatter={h => `${String(h).padStart(2,'0')}:00`} interval={2} />
+                  <YAxis tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Violations">
+                    {hourly.map((d, i) => (
+                      <Cell key={i} fill={[7,8,9,17,18,19,20].includes(d.hour) ? '#ff3b5c' : '#f5a623'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
           <div className="chart-card">
             <div className="chart-title">Vehicle Type Breakdown</div>
             <div className="chart-subtitle">TOP OFFENDING CATEGORIES</div>
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={vehicles} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis dataKey="vehicle_type" tick={{ fill: '#505670', fontSize: 8 }} tickLine={false} />
-                <YAxis tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Count">
-                  {vehicles.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+            {loading ? <div className="loading-state"><div className="spinner" /></div> : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={vehicles} margin={{ top: 5, right: 5, bottom: 0, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis dataKey="vehicle_type" tick={{ fill: '#505670', fontSize: 8 }} tickLine={false} />
+                  <YAxis tick={{ fill: '#505670', fontSize: 9 }} tickLine={false} axisLine={false} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="count" radius={[3, 3, 0, 0]} name="Count">
+                    {vehicles.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
-        {/* Top 5 Hotspots */}
         <div className="chart-card">
           <div className="chart-title">⚠️ Top 5 Critical Hotspots</div>
           <div className="chart-subtitle">RANKED BY CONGESTION IMPACT SCORE</div>
           {loading ? (
             <div className="loading-state"><div className="spinner" /> Loading hotspots…</div>
+          ) : top5.length === 0 ? (
+            <div className="loading-state" style={{ color: 'var(--text-muted)' }}>No hotspot data available</div>
           ) : (
             <table className="data-table">
               <thead>
@@ -205,3 +231,6 @@ export default function Dashboard() {
     </>
   )
 }
+
+          
+                 
