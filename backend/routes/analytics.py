@@ -37,7 +37,7 @@ async def get_hourly():
     result = []
     for h, v in hourly.items():
         try:
-            result.append({"hour": int(h), "count": int(v)})
+            result.append({"hour": int(float(h)), "count": int(v)})
         except (ValueError, TypeError):
             continue
     return sorted(result, key=lambda x: x["hour"])
