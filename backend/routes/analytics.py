@@ -77,21 +77,3 @@ async def get_stations():
         [{"station": k, "count": int(v)} for k, v in stations.items()],
         key=lambda x: x["count"], reverse=True
     )
-
-
-@router.get("/monthly")
-async def get_monthly():
-    data = load_analytics()
-    monthly = data.get("monthly_trend", {})
-    return [{"month": k, "count": int(v)} for k, v in monthly.items()]
-
-
-@router.get("/days")
-async def get_days():
-    data = load_analytics()
-    days = data.get("day_distribution", {})
-    order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    return sorted(
-        [{"day": k, "count": int(v)} for k, v in days.items()],
-        key=lambda x: order.index(x["day"]) if x["day"] in order else 99
-    )
