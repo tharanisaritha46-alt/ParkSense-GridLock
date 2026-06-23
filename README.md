@@ -16,33 +16,11 @@
 
 <br/>
 
-> **BTP Hackathon 2026 · Problem Statement 1 (Parking-Induced Congestion) + PS3 (Computer Vision)**
+> **Flipkart GridLock Hackathon 2.0 2026 · Problem Statement 1 (Parking-Induced Congestion with integrated Computer Vision)**
 >
 > *Transforms 298,450 real Bengaluru parking violation records into 725 actionable enforcement zones — each scored by congestion impact and ready for targeted patrol deployment.*
 
 <br/>
-
----
-
-</div>
-
-## 📸 Screenshots
-
-### Command Dashboard
-![Dashboard](screenshots/dashboard.png)
-*Real-time KPI cards, daily trend, hourly heatmap, and top-5 critical hotspot ranking*
-
-### Hotspot Intelligence Map
-![Hotspot Map](screenshots/hotspot_map.png)
-*725 DBSCAN clusters plotted on Leaflet.js dark map — color-coded by severity tier. Click any cluster for station, score, and patrol recommendation*
-
-### Deep Analytics
-![Analytics](screenshots/analytics.png)
-*Full timeline trend, hour-of-day pattern with peak windows highlighted, vehicle distribution, top police stations*
-
-### Enforcement Deployment Plan
-![Enforcement](screenshots/enforcement.png)
-*AI-ranked top-20 zones with recommended patrol count, timing window, and action type (Tow / Fine / Warning)*
 
 ---
 
@@ -68,6 +46,27 @@ On-street illegal parking near commercial zones, metro stations, and junctions c
 | ⚡ **API** | [saritha-1-parksense-gridlock-api.hf.space](https://saritha-1-parksense-gridlock-api.hf.space) |
 | 📖 **API Docs** | [saritha-1-parksense-gridlock-api.hf.space/docs](https://saritha-1-parksense-gridlock-api.hf.space/docs) |
 | 💻 **GitHub** | [tharanisaritha46-alt/ParkSense-GridLock](https://github.com/tharanisaritha46-alt/ParkSense-GridLock) |
+
+---
+</div>
+
+## 📸 Screenshots
+
+### Command Dashboard
+![Dashboard](screenshots/dashboard.png)
+*Real-time KPI cards, daily trend, hourly heatmap, and top-5 critical hotspot ranking*
+
+### Hotspot Intelligence Map
+![Hotspot Map](screenshots/hotspot_map.png)
+*725 DBSCAN clusters plotted on Leaflet.js dark map — color-coded by severity tier. Click any cluster for station, score, and patrol recommendation*
+
+### Deep Analytics
+![Analytics](screenshots/analytics.png)
+*Full timeline trend, hour-of-day pattern with peak windows highlighted, vehicle distribution, top police stations*
+
+### Enforcement Deployment Plan
+![Enforcement](screenshots/enforcement.png)
+*AI-ranked top-20 zones with recommended patrol count, timing window, and action type (Tow / Fine / Warning)*
 
 ---
 
@@ -98,7 +97,7 @@ On-street illegal parking near commercial zones, metro stations, and junctions c
 │   Dashboard · Hotspot Map · Analytics · Evidence · Enforcement  │
 │   Hosted: Vercel (CDN, free)                                    │
 └─────────────────────────────────────────────────────────────────┘
-                                │ (PS3 Integration)
+                                │ (CV Integration)
 ┌───────────────────────────────▼─────────────────────────────────┐
 │                    CV PIPELINE                                  │
 │   Upload Image → YOLOv8x → Violation Classify → EasyOCR Plate  │
@@ -186,7 +185,7 @@ Top Zone Score          ██████████████████�
 
 ---
 
-## 🤖 Computer Vision Pipeline (PS3 Integration)
+## 🤖 Computer Vision Pipeline 
 
 ```
 Traffic Image
@@ -408,7 +407,7 @@ Full interactive docs: [`/docs`](https://saritha-1-parksense-gridlock-api.hf.spa
 
 | Field | Detail |
 |---|---|
-| **Source** | Bengaluru Traffic Police (PS1 FGLH dataset) |
+| **Source** | Flipkart Gridlock Hackathon 2.0 and Bengaluru Traffic Police (PS1 FGLH dataset) |
 | **Records** | 298,450 parking violations |
 | **Period** | November 2023 – April 2024 |
 | **Geography** | Greater Bengaluru (Lat 12.80–13.20, Lon 77.40–77.90) |
@@ -430,7 +429,7 @@ Full interactive docs: [`/docs`](https://saritha-1-parksense-gridlock-api.hf.spa
 
 ## 👥 Team
 
-Built for **BTP AI Hackathon 2026** — Problem Statement 1 (Parking-Induced Congestion) with integrated PS3 (Computer Vision Evidence) features.
+Built for **FLIPKART GRIDLOCK HACKATHON 2.0, 2026** — Problem Statement 1 (Parking-Induced Congestion) with integrated Computer Vision Evidence features.
 
 ---
 
