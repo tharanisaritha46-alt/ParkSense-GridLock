@@ -40,7 +40,7 @@ async def root():
         "service": "ParkSense GridLock",
         "status": "operational",
         "version": "1.0.0",
-        "description": "AI parking intelligence — PS1 submission, BTP Hackathon 2024",
+        "description": "AI parking intelligence — PS1 submission, BTP Hackathon 2026",
         "docs": "/docs",
     }
 

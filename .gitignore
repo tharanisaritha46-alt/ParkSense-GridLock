@@ -19,8 +19,10 @@ dist/
 .env.local
 .env.production
 
-# Data (large files)
-data/raw/*.csv
+# Data — full dataset too large for git (use Git LFS or download separately)
+# Sample CSV for notebooks IS committed (see data/raw/PS1_SAMPLE_100rows.csv)
+data/raw/ps1_dataset.csv
+data/raw/PS1_DATASET_FGLH.csv
 data/processed/*.csv
 
 # OS
@@ -32,7 +34,7 @@ Thumbs.db
 .idea/
 *.swp
 
-# Outputs — committed so Render can serve without re-running pipeline
+# Outputs — committed so Render/HF can serve without re-running pipeline
 # backend/outputs/*.json
 
 # Logs

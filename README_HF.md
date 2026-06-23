@@ -12,7 +12,7 @@ app_port: 7860
 
 FastAPI backend for the ParkSense GridLock parking intelligence system.
 
-Built for BTP Hackathon 2024 — PS1 (Parking-Induced Congestion).
+Built for BTP Hackathon 2026 — PS1 (Parking-Induced Congestion).
 
 ## Endpoints
 

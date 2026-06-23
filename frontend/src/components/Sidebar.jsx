@@ -39,7 +39,7 @@ export default function Sidebar() {
 
       <div className="sidebar-footer">
         <div style={{ marginBottom: 4, color: 'var(--text-secondary)', fontSize: 11, fontFamily: 'var(--font-display)', fontWeight: 600 }}>
-          PS1 — BTP Hackathon 2024
+          PS1 — BTP Hackathon 2026
         </div>
         <div>Dataset: 298,450 records</div>
         <div>City: Bengaluru, KA</div>
