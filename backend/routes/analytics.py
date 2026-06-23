@@ -1,13 +1,16 @@
 import json
 from pathlib import Path
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter()
 OUTPUTS = Path(__file__).parent.parent / "outputs"
 
 
 def load_analytics():
-    with open(OUTPUTS / "analytics.json") as f:
+    path = OUTPUTS / "analytics.json"
+    if not path.exists():
+        raise HTTPException(status_code=500, detail=f"analytics.json not found at {path}")
+    with open(path) as f:
         return json.load(f)
 
 
@@ -20,39 +23,75 @@ async def get_analytics():
 async def get_kpis():
     data = load_analytics()
     return {
-        "total_violations": data["total_violations"],
-        "total_clusters": data["total_clusters"],
-        "critical_zones": data["critical_zones"],
-        "high_zones": data["high_zones"],
+        "total_violations": data.get("total_violations", 0),
+        "total_clusters": data.get("total_clusters", 0),
+        "critical_zones": data.get("critical_zones", 0),
+        "high_zones": data.get("high_zones", 0),
     }
 
 
 @router.get("/hourly")
 async def get_hourly():
     data = load_analytics()
-    hourly = data["hourly_distribution"]
-    return [{"hour": int(float(h)), "count": int(v)} for h, v in sorted(hourly.items(), key=lambda x: int(float(x[0])))]
+    hourly = data.get("hourly_distribution", {})
+    result = []
+    for h, v in hourly.items():
+        try:
+            result.append({"hour": int(h), "count": int(v)})
+        except (ValueError, TypeError):
+            continue
+    return sorted(result, key=lambda x: x["hour"])
 
 
 @router.get("/vehicles")
 async def get_vehicles():
     data = load_analytics()
-    return [{"vehicle_type": k, "count": v} for k, v in data["vehicle_breakdown"].items()]
+    breakdown = data.get("vehicle_breakdown", {})
+    return sorted(
+        [{"vehicle_type": k, "count": int(v)} for k, v in breakdown.items()],
+        key=lambda x: x["count"], reverse=True
+    )
 
 
 @router.get("/violations")
 async def get_violations():
     data = load_analytics()
-    return [{"violation": k, "count": v} for k, v in data["violation_types"].items()]
+    types = data.get("violation_types", {})
+    return sorted(
+        [{"violation": k, "count": int(v)} for k, v in types.items()],
+        key=lambda x: x["count"], reverse=True
+    )
 
 
 @router.get("/trend")
 async def get_trend():
     data = load_analytics()
-    return data["daily_trend"]
+    return data.get("daily_trend", [])
 
 
 @router.get("/stations")
 async def get_stations():
     data = load_analytics()
-    return [{"station": k, "count": v} for k, v in data["top_police_stations"].items()]
+    stations = data.get("top_police_stations", {})
+    return sorted(
+        [{"station": k, "count": int(v)} for k, v in stations.items()],
+        key=lambda x: x["count"], reverse=True
+    )
+
+
+@router.get("/monthly")
+async def get_monthly():
+    data = load_analytics()
+    monthly = data.get("monthly_trend", {})
+    return [{"month": k, "count": int(v)} for k, v in monthly.items()]
+
+
+@router.get("/days")
+async def get_days():
+    data = load_analytics()
+    days = data.get("day_distribution", {})
+    order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    return sorted(
+        [{"day": k, "count": int(v)} for k, v in days.items()],
+        key=lambda x: order.index(x["day"]) if x["day"] in order else 99
+    )
