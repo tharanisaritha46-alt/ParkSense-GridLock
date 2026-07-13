@@ -46,7 +46,25 @@ VIOLATION_SEVERITY = {
     "WRONG PARKING": "HIGH",
     "NO PARKING": "MEDIUM",
 }
+_SEVERITY_RANK = {"CRITICAL": 3, "HIGH": 2, "MEDIUM": 1}
 KA_SUFFIXES = ["AA", "BB", "CC", "MK", "XX", "HH", "MM", "PE", "RE", "HK"]
+
+
+def _classify_severity(violation: str) -> str:
+    """
+    Some cluster dominant_violation values are compound, e.g.
+    'NO PARKING, WRONG PARKING, PARKING ON FOOTPATH' (~10% of hotspots).
+    An exact dict lookup on these silently falls through to a default and
+    under-reports severity. Scan for known violation keywords instead and
+    return the highest severity present.
+    """
+    best, best_rank = "MEDIUM", 0
+    for key, sev in VIOLATION_SEVERITY.items():
+        if key in violation:
+            rank = _SEVERITY_RANK[sev]
+            if rank > best_rank:
+                best, best_rank = sev, rank
+    return best
 
 
 def _fake_plate() -> str:
@@ -91,7 +109,7 @@ def _simulate_detection(filename: str, hotspot_id: Optional[int] = None) -> dict
             "violation": viol,
             "violation_confidence": viol_conf,
             "violation_source": viol_source,
-            "severity": VIOLATION_SEVERITY.get(viol, "MEDIUM"),
+            "severity": _classify_severity(viol),
             "bbox": {
                 "x1": random.randint(40, 180),
                 "y1": random.randint(40, 120),
@@ -185,7 +203,7 @@ def _real_inference(image_bytes: bytes, filename: str, hotspot_id: Optional[int]
                 "violation": viol,
                 "violation_confidence": viol_conf,
                 "violation_source": viol_source,
-                "severity": VIOLATION_SEVERITY.get(viol, "UNKNOWN"),
+                "severity": _classify_severity(viol),
                 "bbox": {"x1": x1, "y1": y1, "x2": x2, "y2": y2},
                 "license_plate": plate_text,
                 "plate_confidence": round(plate_conf, 3),

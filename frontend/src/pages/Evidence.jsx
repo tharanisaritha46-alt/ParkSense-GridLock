@@ -27,14 +27,6 @@ export default function Evidence() {
     setAnalyzing(false)
   }
 
-  const VIOL_SEVERITY = {
-    'PARKING NEAR ROAD CROSSING': 'CRITICAL',
-    'PARKING ON FOOTPATH': 'CRITICAL',
-    'PARKING IN A MAIN ROAD': 'HIGH',
-    'WRONG PARKING': 'HIGH',
-    'NO PARKING': 'MEDIUM',
-  }
-
   return (
     <>
       <div className="page-header">
@@ -113,11 +105,15 @@ export default function Evidence() {
                         <span style={{ fontFamily:'var(--font-display)', fontWeight:600, fontSize:12, color:'var(--text-primary)' }}>
                           {d.vehicle_class.toUpperCase()}
                         </span>
-                        <SeverityBadge tier={VIOL_SEVERITY[d.violation] || 'MEDIUM'} />
+                        <SeverityBadge tier={d.severity || 'MEDIUM'} />
                       </div>
                       <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
                         <span className="stat-pill">⚠️ {d.violation}</span>
-                        <span className="stat-pill">🎯 {Math.round(d.violation_confidence*100)}%</span>
+                        {d.violation_confidence != null ? (
+                          <span className="stat-pill">🎯 {Math.round(d.violation_confidence * 100)}%</span>
+                        ) : (
+                          <span className="stat-pill" title="Violation type from this hotspot's historical data, not a visual confidence score">📍 Location-based</span>
+                        )}
                         <span className="stat-pill">🪪 {d.license_plate}</span>
                       </div>
                     </div>
