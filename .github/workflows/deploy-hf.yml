@@ -1,0 +1,44 @@
+name: Sync to Hugging Face Spaces
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Keep-alive ping every 30 min to reduce cold-start risk during judging.
+    # Note: GitHub's scheduler is best-effort, not exact — trigger manually
+    # (workflow_dispatch, below) right before a demo/judging session for certainty.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-to-hf:
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Swap in HF Spaces README (needs sdk/app_port config at repo root)
+        run: |
+          cp README.md README_PROJECT_BACKUP.md
+          cp README_HF.md README.md
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add README.md
+          git commit -m "Deploy: sync HF Spaces README [skip ci]" --allow-empty
+          git push --force https://saritha-1:${HF_TOKEN}@huggingface.co/spaces/saritha-1/parksense-gridlock-api HEAD:main
+
+  keep-alive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          curl -sf --max-time 20 https://saritha-1-parksense-gridlock-api.hf.space/health \
+            && echo "OK" || echo "::warning::Health check failed — Space may be asleep or down"
